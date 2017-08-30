@@ -9,7 +9,7 @@ var rooms = new HashMap()
 var players = new HashMap()
 
 // запуск сервера
-server.listen(34197, function() {
+server.listen(8080, function() {
     console.log("Server started");
 });
 
