@@ -8,12 +8,9 @@ var games = ["tictactoe", "checkers", "chess"]
 var rooms = new HashMap()
 var players = new HashMap()
 
-var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
-var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
-
 // запуск сервера
 server.listen(process.env.PORT, function(){
-  console.log("server_port " + process.env.PORT);
+  console.log("CMS games server started");
 });
 
 //подключение игрока к серверу
@@ -90,7 +87,37 @@ io.on('connection', function(socket) {
 
     //выход из комнаты
     socket.on('leaveRoom', function(data) {
-        
+        console.log("Player (" + socket.id + ") left from room " + players.get(socket.id).room);
+        if (players.get(socket.id).room != "-1") {
+            if (rooms.get(players.get(socket.id).room).players.length > 1) {
+                if (rooms.get(players.get(socket.id).room).players[0] == socket.id) {
+                    socket.broadcast.emit('changeRoomID', rooms.get(players.get(socket.id).room).players[1]);
+
+                    for (i = 1; i < rooms.get(players.get(socket.id).room).players.length; i++) {
+                        players.get(rooms.get(players.get(socket.id).room).players[i]).room = rooms.get(players.get(socket.id).room).players[1];
+                    }
+
+                    rooms.get(players.get(socket.id).room).players.splice(0, 1);
+                    rooms.set(players.get(socket.id).room, rooms.get(players.get(socket.id).room));
+                    rooms.remove(socket.id);
+
+                    players.get(socket.id).room = "-1";
+                }
+                else {
+                    socket.broadcast.emit('leaveRoom', { roomID: players.get(socket.id).room, playerID: socket.id });
+                    for (i = 1; i < rooms.get(players.get(socket.id).room).players.length; i++) {
+                        if (rooms.get(players.get(socket.id).room).players[i] == socket.id) {
+                            rooms.get(players.get(socket.id)).players.splice(i, 1);
+                        }
+                    }
+                    players.get(socket.id).room = "-1";
+                }
+            }
+            else {
+                socket.emit('deleteRoom', { roomID: players.get(socket.id).room })
+                socket.broadcast.emit('deleteRoom', { roomID: players.get(socket.id).room });
+            }
+        }
     });
 
     //ход игрока
@@ -103,23 +130,34 @@ io.on('connection', function(socket) {
         //оповещение об отключении
         console.log("Player disconnected (" + socket.id + ")");
         socket.broadcast.emit('playerDisconnected', { id: socket.id });
-        //удаление отключившегося игрока
-        for (var i = 0; i < players.length; i++) {
-            if (players[i].id == socket.id) {
-                if (players[i].room != -1) {
-                    for (var j = 0; j < rooms.length; j++) {
-                        if (players[i].room == rooms[j].id) {
-                            for (var k = 0; k < rooms[j].players.length; k++) {
-                                if (players[i].id == rooms[j].players[k]) {
-                                    rooms[j].players.splice(k, 1);
-                                }
-                            }
+        if (players.get(socket.id).room != "-1") {
+            if (rooms.get(players.get(socket.id).room).players.length > 1) {
+                if (rooms.get(players.get(socket.id).room).players[0] == socket.id) {
+                    socket.broadcast.emit('changeRoomID', rooms.get(players.get(socket.id).room).players[1]);
+
+                    for (i = 1; i < rooms.get(players.get(socket.id).room).players.length; i++) {
+                        players.get(rooms.get(players.get(socket.id).room).players[i]).room = rooms.get(players.get(socket.id).room).players[1];
+                    }
+
+                    rooms.get(players.get(socket.id).room).players.splice(0, 1);
+                    rooms.set(players.get(socket.id).room, rooms.get(players.get(socket.id).room));
+                    rooms.remove(socket.id);
+
+                    players.get(socket.id).room = "-1";
+                }
+                else {
+                    socket.broadcast.emit('leaveRoom', { roomID: players.get(socket.id).room, playerID: socket.id });
+                    for (i = 1; i < rooms.get(players.get(socket.id).room).players.length; i++) {
+                        if (rooms.get(players.get(socket.id).room).players[i] == socket.id) {
+                            rooms.get(players.get(socket.id)).players.splice(i, 1);
                         }
                     }
+                    players.get(socket.id).room = "-1";
                 }
-                players.splice(i, 1);
-                //Удаление комнаты, если это был последний игрок
-                
+            }
+            else {
+                socket.emit('deleteRoom', { roomID: players.get(socket.id).room })
+                socket.broadcast.emit('deleteRoom', { roomID: players.get(socket.id).room });
             }
         }
     });
