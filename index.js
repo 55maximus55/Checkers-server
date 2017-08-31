@@ -8,11 +8,12 @@ var games = ["tictactoe", "checkers", "chess"]
 var rooms = new HashMap()
 var players = new HashMap()
 
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+
 // запуск сервера
-server.listen(process.env.OPENSHIFT_NODEJS_PORT || 8080, function() {
-    console.log("Server started");
-	console.log("IP: " + process.env.OPENSHIFT_NODEJS_IP);
-	console.log("port: " + process.env.OPENSHIFT_NODEJS_PORT || 8080);
+server.listen(server_port, server_ip_address, function(){
+  console.log("Listening on " + server_ip_address + ", server_port " + server_port)
 });
 
 //подключение игрока к серверу
