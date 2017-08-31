@@ -9,8 +9,10 @@ var rooms = new HashMap()
 var players = new HashMap()
 
 // запуск сервера
-server.listen(8080, function() {
+server.listen(process.env.OPENSHIFT_NODEJS_PORT, function() {
     console.log("Server started");
+	console.log("IP: " + process.env.OPENSHIFT_NODEJS_IP);
+	console.log("port: " + process.env.OPENSHIFT_NODEJS_PORT);
 });
 
 //подключение игрока к серверу
