@@ -65,38 +65,32 @@ io.on('connection', function(socket) {
 
     //вход в комнату
     socket.on('joinRoom', function(data) {
-        // for (var i = 0; i < players.length; i++) {
-        //     if (players[i].room != -1) {
-        //         var g = true;
-        //         for (var j = 0; j < rooms.length; j++) {
-        //             if (rooms[j].id == data.id) {
-        //                 g = false;
-        //                 //вход в комнату и сообщение об этом игрокам
-        //                 players[i].room = data.id;
-        //                 rooms[j].players.push(socket.id);
-        //                 socket.emit('joinRoomSuccess', { roomID: rooms[j].id });
-        //                 socket.broadcast.emit('joinRoom', { playerID: socket.id, roomID: rooms[j].id });
-        //                 console.log("Player (" + socket.id +") joined to room (" + rooms[j].id + ")");
-        //             }
-        //         }
-        //         if (g) {
-        //             socket.emit('joinRoomError', { reason: "404: room not found"});
-        //         }
-        //     }
-        //     else {
-        //         socket.emit('createRoomError', { reason: "Leave another room before join another" });
-        //     }
-        // }
+        if (players.get(socket.id).room != "-1") {
+            var g = false;
+            rooms.forEach(function (value, key) {
+                if (data.roomID == key) {
+                    g = true;
+                }
+            });
+            if (g) {
+                players.get(socket.id).room = data.roomID;
+                rooms.get(data.roomID).players.push(socket.id);
+                socket.emit('joinRoomSuccess', rooms.get(data.roomID).players);
+                socket.broadcast.emit('joinRoom', { playerID: socket.id, roomID: data.roomID });
+                console.log("Player (" + socket.id +") joined to room (" + data.roomID + ")");
+            }
+            else {
+                socket.emit('joinRoomError', { reason: "404: room not found"});
+            }
+        }
+        else {
+            socket.emit('createRoomError', { reason: "Leave another room before join another" });
+        }
     });
 
     //выход из комнаты
     socket.on('leaveRoom', function(data) {
-
-    });
-
-    //удаление комнаты
-    socket.on('deleteRoom', function(data) {
-
+        
     });
 
     //ход игрока
