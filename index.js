@@ -91,7 +91,7 @@ io.on('connection', function(socket) {
         if (players.get(socket.id).room != "-1") {
             if (rooms.get(players.get(socket.id).room).players.length > 1) {
                 if (rooms.get(players.get(socket.id).room).players[0] == socket.id) {
-                    socket.broadcast.emit('changeRoomID', rooms.get(players.get(socket.id).room).players[1]);
+                    socket.broadcast.emit('changeRoomID', { oldID: socket.id, newID: rooms.get(players.get(socket.id).room).players[1] });
 
                     for (i = 1; i < rooms.get(players.get(socket.id).room).players.length; i++) {
                         players.get(rooms.get(players.get(socket.id).room).players[i]).room = rooms.get(players.get(socket.id).room).players[1];
@@ -133,7 +133,7 @@ io.on('connection', function(socket) {
         if (players.get(socket.id).room != "-1") {
             if (rooms.get(players.get(socket.id).room).players.length > 1) {
                 if (rooms.get(players.get(socket.id).room).players[0] == socket.id) {
-                    socket.broadcast.emit('changeRoomID', rooms.get(players.get(socket.id).room).players[1]);
+                    socket.broadcast.emit('changeRoomID', { oldID: socket.id, newID: rooms.get(players.get(socket.id).room).players[1] });
 
                     for (i = 1; i < rooms.get(players.get(socket.id).room).players.length; i++) {
                         players.get(rooms.get(players.get(socket.id).room).players[i]).room = rooms.get(players.get(socket.id).room).players[1];
